@@ -31,6 +31,14 @@ void main()
 }
 """
 
+_shared_program = None
+
+def get_default_shader():
+    global _shared_program
+    if _shared_program is None:
+        _shared_program = create_program(vertex_source_default, fragment_source_default)
+    return _shared_program
+
 def create_program(vs_source, fs_source):
     # compile the vertex and fragment sources to a shader program
     vert_shader = Shader(vs_source, 'vertex')

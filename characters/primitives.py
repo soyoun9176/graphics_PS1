@@ -12,17 +12,10 @@ class CustomGroup(pyglet.graphics.Group):
     '''
     def __init__(self, transform_mat: Mat4, order):
         super().__init__(order)
-
-        '''
-        Create shader program for each shape
-        '''
-        self.shader_program = shader.create_program(
-            shader.vertex_source_default, shader.fragment_source_default
-        )
+        self.shader_program = shader.get_default_shader()
 
         self.transform_mat = transform_mat
         self.indexed_vertices_list = None
-        self.shader_program.use()
 
     def set_state(self):
         self.shader_program.use()

@@ -99,12 +99,10 @@ class RenderWindow(pyglet.window.Window):
                     shape.transform_mat = part.joint.world_transform @ part.local_model
 
         view_proj = self.proj_mat @ self.view_mat
-        # update view-projection for all shapes
-        for shapes_list in self.character_shapes:
-            for shape in shapes_list:
-                shape.shader_program['view_proj'] = view_proj
-        for shape in self.static_shapes:
-            shape.shader_program['view_proj'] = view_proj
+        # Update view-projection once for the shared shader program
+        shader_program = shader.get_default_shader()
+        shader_program.use()
+        shader_program['view_proj'] = view_proj
 
     def on_resize(self, width, height):
         glViewport(0, 0, *self.get_framebuffer_size())
