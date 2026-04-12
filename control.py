@@ -30,7 +30,33 @@ class Control:
         # TODO:
         if symbol == pyglet.window.key.C:
             self.window.move_cam = not self.window.move_cam
+        elif symbol == pyglet.window.key.W:
+            pungpung = self._find_character_by_name("Pungpung")
+            if pungpung:
+                pungpung.set_state("waving")
+        elif symbol == pyglet.window.key.I:
+            pungpung = self._find_character_by_name("Pungpung")
+            if pungpung:
+                pungpung.set_state("idle")
+        elif symbol == pyglet.window.key.K:
+            pungpung = self._find_character_by_name("Pungpung")
+            if pungpung:
+                pungpung.set_state("walking")
+        elif symbol == pyglet.window.key.M:
+            pungpung = self._find_character_by_name("Pungpung")
+            if pungpung:
+                pungpung.set_state("mouth_fart")
+
         pass
+
+    def _find_character_by_name(self, name):
+        """
+        Find a character by name in the window's characters list.
+        """
+        for character in self.window.characters:
+            if character.name == name:
+                return character
+        return None
     
     def on_key_release(self, symbol, modifier):
         if symbol == pyglet.window.key.ESCAPE:

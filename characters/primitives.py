@@ -45,7 +45,7 @@ class Cube:
     '''
     default structure of cube
     '''
-    def __init__(self, scale=1.0):
+    def __init__(self, scale=(1.0, 1.0, 1.0)):
         self.vertices = [-0.5, -0.5, 0.5,
             0.5, -0.5, 0.5,
             0.5, 0.5, 0.5,

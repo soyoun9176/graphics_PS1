@@ -10,7 +10,9 @@ from pyglet.gl import *
 
 import shader
 from characters.primitives import CustomGroup
-from characters.pungpung_animation import wave_arms
+from characters.pungpung import Pungpung
+from characters.character import Character
+from characters.world import World
 
 
 
@@ -39,6 +41,8 @@ class RenderWindow(pyglet.window.Window):
         self.shapes = []
         self.character_root = None
         self.character_parts = []
+        self.world = None
+        self.characters = []  # List of characters for multiple character support
         self.setup()
 
         self.animate = True
@@ -73,8 +77,8 @@ class RenderWindow(pyglet.window.Window):
             self.cam_angle += dt
             
             # 2. new camera position
-            new_x = self.cam_target.x + self.cam_radius * math.sin(self.cam_angle)
-            new_z = self.cam_target.z + self.cam_radius * math.cos(self.cam_angle)
+            new_x = self.cam_target.x + self.cam_radius * math.sin(self.cam_angle*0.4)
+            new_z = self.cam_target.z + self.cam_radius * math.cos(self.cam_angle*0.4)
             self.cam_eye = Vec3(new_x, self.cam_eye.y, new_z)
             
             # 3. new view matrix
@@ -82,12 +86,26 @@ class RenderWindow(pyglet.window.Window):
         
         if self.animate:
             # 4. update character animation
-            if self.character_root:
-                wave_arms(self.character_root, pyglet.clock.get_default().time())
-                self.character_root.update_world()
-                # update shapes transforms
-                for i, part in enumerate(self.character_parts):
-                    self.shapes[i].transform_mat = part.joint.world_transform @ part.local_model
+            time = pyglet.clock.get_default().time()
+            if self.world:
+                self.world.update_all(time)
+                # Update shapes transforms for all characters in the world
+                shape_index = 0
+                for root, parts in self.world.get_all_roots_and_parts():
+                    for part in parts:
+                        self.shapes[shape_index].transform_mat = part.joint.world_transform @ part.local_model
+                        shape_index += 1
+            elif self.characters:
+                # Update all characters in the list
+                for character in self.characters:
+                    character.update_animation(time)
+                    character.update_world()
+                # Update shapes transforms for all characters
+                shape_index = 0
+                for character in self.characters:
+                    for part in character.parts:
+                        self.shapes[shape_index].transform_mat = part.joint.world_transform @ part.local_model
+                        shape_index += 1
 
         view_proj = self.proj_mat @ self.view_mat
         for i, shape in enumerate(self.shapes):
@@ -103,12 +121,46 @@ class RenderWindow(pyglet.window.Window):
             aspect = width/height, z_near=self.z_near, z_far=self.z_far, fov = self.fov)
         return pyglet.event.EVENT_HANDLED
 
-    def set_character(self, root, parts):
-        self.character_root = root
-        self.character_parts = parts
-        for part in parts:
+    def set_character(self, character):
+        """
+        Add a single character to the characters list.
+        """
+        self.characters.append(character)
+        # Add shapes for the character
+        for part in character.parts:
             transform = part.joint.world_transform @ part.local_model
             self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
+
+    def set_world(self, world: World):
+        self.world = world
+        # Clear existing shapes
+        self.shapes.clear()
+        # Add all characters from the world
+        for root, parts in world.get_all_roots_and_parts():
+            for part in parts:
+                transform = part.joint.world_transform @ part.local_model
+                self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
+
+    def add_character(self, character: Character):
+        """
+        Add a character to the renderer's character list.
+        """
+        self.characters.append(character)
+        # Add shapes for the new character
+        for part in character.parts:
+            transform = part.joint.world_transform @ part.local_model
+            self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
+
+    def set_characters(self, characters_list):
+        """
+        Set multiple characters at once.
+        """
+        self.characters = characters_list
+        self.shapes.clear()
+        for character in self.characters:
+            for part in character.parts:
+                transform = part.joint.world_transform @ part.local_model
+                self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
 
     def add_shape(self, transform, vertice, indice, color):
         
