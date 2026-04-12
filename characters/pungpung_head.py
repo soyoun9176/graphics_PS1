@@ -78,7 +78,7 @@ def create_head(parent_joint):
     parts.append(pupil_r_part)
 
     # alternate eyes for mouth fart expression (><) - using 4 cubes
-    # Left eye: two cubes for \
+    # Left eye: two cubes for >
     eye_fx_l1 = Joint("eye_fx_l1", parent=head_root)
     eye_fx_l1.local_transform = Mat4.from_translation(Vec3(-0.18, 0.15, 0.45))
     eye_fx_l1_mesh = Cube()
@@ -88,16 +88,16 @@ def create_head(parent_joint):
     parts.append(eye_fx_l1_part)
 
     eye_fx_l2 = Joint("eye_fx_l2", parent=head_root)
-    eye_fx_l2.local_transform = Mat4.from_translation(Vec3(-0.14, 0.15, 0.45))
+    eye_fx_l2.local_transform = Mat4.from_translation(Vec3(-0.18, 0.19, 0.45))
     eye_fx_l2_mesh = Cube()
     _solid_color(eye_fx_l2_mesh, eye_color)
     eye_fx_l2_model = Mat4.from_rotation(math.radians(45), Vec3(0, 0, 1)) @ Mat4.from_scale(Vec3(0.03, 0.08, 0.02))
     eye_fx_l2_part = Part(eye_fx_l2, eye_fx_l2_mesh, eye_fx_l2_model)
     parts.append(eye_fx_l2_part)
 
-    # Right eye: two cubes for /
+    # Right eye: two cubes for >
     eye_fx_r1 = Joint("eye_fx_r1", parent=head_root)
-    eye_fx_r1.local_transform = Mat4.from_translation(Vec3(0.14, 0.15, 0.45))
+    eye_fx_r1.local_transform = Mat4.from_translation(Vec3(0.18, 0.19, 0.45))
     eye_fx_r1_mesh = Cube()
     _solid_color(eye_fx_r1_mesh, eye_color)
     eye_fx_r1_model = Mat4.from_rotation(math.radians(-45), Vec3(0, 0, 1)) @ Mat4.from_scale(Vec3(0.03, 0.08, 0.02))
