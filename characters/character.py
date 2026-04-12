@@ -1,4 +1,5 @@
-from characters.rig import Joint, Part
+from pyglet.math import Mat4, Vec3
+
 
 class Character:
     """
@@ -29,3 +30,12 @@ class Character:
         Return root joint and parts list for rendering.
         """
         return self.root, self.parts
+    
+    def get_forward_vector(self):
+        if (self.root == None or self.root.local_transform == None) : return Vec3(0,1,0)
+        forward = Vec3(self.root.local_transform[8], self.root.local_transform[9], self.root.local_transform[10])
+        return forward.normalize()
+    
+    def move_forward(self, amount :float):
+        self.root.local_transform = Mat4.from_translation(self.get_forward_vector() * amount) @ self.root.local_transform
+        self.update_world()

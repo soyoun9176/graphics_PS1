@@ -22,9 +22,10 @@ class Pungpung(Character):
     def __init__(self):
         super().__init__()
         self.name = "Pungpung"
-        self.state = "waving"  # Default to waving
+        self.state = "idle"  # Default to idle
         self.root = Joint("root")
         self.set_time = 0
+        self.walk_last_time = None
 
         body_color = (255, 145, 15, 255)
         arm_leg_color = (255, 165, 0, 255)
@@ -35,7 +36,7 @@ class Pungpung(Character):
 
         # Body
         self.torso = Joint("torso", parent=self.root)
-        self.torso.base_transform = Mat4.from_translation(Vec3(0, 0.85, 0))
+        self.torso.base_transform = Mat4.from_translation(Vec3(0, 1.85, 0))
         self.torso.local_transform = self.torso.base_transform
         
         self.belly = Joint("belly", parent=self.torso)
@@ -132,21 +133,21 @@ class Pungpung(Character):
 
         # Left leg
         self.left_hip = Joint("left_hip", parent=self.torso)
-        self.left_hip.base_transform = Mat4.from_translation(Vec3(-0.22, -0.15, 0.1))
+        self.left_hip.base_transform = Mat4.from_translation(Vec3(-0.22, -0.6, 0.1))
         self.left_hip.local_transform = self.left_hip.base_transform
         thigh_left = Sphere(18, 18, 1.0)
         _solid_color(thigh_left, body_color)
-        self.parts.append(Part(self.left_hip, thigh_left, Mat4.from_translation(Vec3(0, -0.30, 0.08)) @ Mat4.from_scale(Vec3(0.15, 0.30, 0.15))))
+        self.parts.append(Part(self.left_hip, thigh_left, Mat4.from_translation(Vec3(0, -0.30, 0.08)) @ Mat4.from_scale(Vec3(0.2, 0.40, 0.2))))
 
         self.left_knee = Joint("left_knee", parent=self.left_hip)
         self.left_knee.base_transform = Mat4.from_translation(Vec3(0, -0.60, 0.05))
         self.left_knee.local_transform = self.left_knee.base_transform
         shin_left = Sphere(18, 18, 1.0)
         _solid_color(shin_left, body_color)
-        self.parts.append(Part(self.left_knee, shin_left, Mat4.from_translation(Vec3(0, -0.27, 0.08)) @ Mat4.from_scale(Vec3(0.14, 0.27, 0.14))))
+        self.parts.append(Part(self.left_knee, shin_left, Mat4.from_translation(Vec3(0, -0.27, 0.08)) @ Mat4.from_scale(Vec3(0.17, 0.27, 0.17))))
 
         self.left_foot = Joint("left_foot", parent=self.left_knee)
-        self.left_foot.base_transform = Mat4.from_translation(Vec3(0, -0.55, 0.14))
+        self.left_foot.base_transform = Mat4.from_translation(Vec3(0, -0.50, 0.14))
         self.left_foot.local_transform = self.left_foot.base_transform
         foot_left = Sphere(20, 20, 1.0)
         _solid_color(foot_left, dark_color)
@@ -154,21 +155,21 @@ class Pungpung(Character):
 
         # Right leg
         self.right_hip = Joint("right_hip", parent=self.torso)
-        self.right_hip.base_transform = Mat4.from_translation(Vec3(0.22, -0.15, 0.1))
+        self.right_hip.base_transform = Mat4.from_translation(Vec3(0.22, -0.6, 0.1))
         self.right_hip.local_transform = self.right_hip.base_transform
         thigh_right = Sphere(18, 18, 1.0)
         _solid_color(thigh_right, body_color)
-        self.parts.append(Part(self.right_hip, thigh_right, Mat4.from_translation(Vec3(0, -0.30, 0.08)) @ Mat4.from_scale(Vec3(0.15, 0.30, 0.15))))
+        self.parts.append(Part(self.right_hip, thigh_right, Mat4.from_translation(Vec3(0, -0.30, 0.08)) @ Mat4.from_scale(Vec3(0.2, 0.40, 0.2))))
 
         self.right_knee = Joint("right_knee", parent=self.right_hip)
         self.right_knee.base_transform = Mat4.from_translation(Vec3(0, -0.60, 0.05))
         self.right_knee.local_transform = self.right_knee.base_transform
         shin_right = Sphere(18, 18, 1.0)
         _solid_color(shin_right, body_color)
-        self.parts.append(Part(self.right_knee, shin_right, Mat4.from_translation(Vec3(0, -0.27, 0.08)) @ Mat4.from_scale(Vec3(0.14, 0.27, 0.14))))
+        self.parts.append(Part(self.right_knee, shin_right, Mat4.from_translation(Vec3(0, -0.27, 0.08)) @ Mat4.from_scale(Vec3(0.17, 0.27, 0.17))))
 
         self.right_foot = Joint("right_foot", parent=self.right_knee)
-        self.right_foot.base_transform = Mat4.from_translation(Vec3(0, -0.55, 0.14))
+        self.right_foot.base_transform = Mat4.from_translation(Vec3(0, -0.50, 0.14))
         self.right_foot.local_transform = self.right_foot.base_transform
         foot_right = Sphere(20, 20, 1.0)
         _solid_color(foot_right, dark_color)
@@ -260,13 +261,61 @@ class Pungpung(Character):
         anim_rotation = Mat4.from_rotation(math.sin((time-self.set_time) * 3 + math.pi + math.pi/4) * 0.2, Vec3(1, 0, 0))
         self.right_elbow.local_transform = base_transform @ anim_rotation
 
+
     def _walk_animation(self, time):
         """
-        Walking animation
+        periodical modeling of walking
         """
-        # TODO: Implement walking animation
-        pass
+        # periods
+        stride_time = 1.2
+        cycle = ((time - self.set_time) / stride_time) % 1.0
+        phi = cycle * 2 * math.pi
+        walk_speed = 0.35 
 
+        # hip & knee
+        def calc_leg_joints(phase_offset):
+            p = (phi + phase_offset) % (2 * math.pi)
+            hip = math.sin(p) * walk_speed
+            if math.sin(p) < 0:
+                knee = -math.sin(p) * 0.8  #앞
+            else: 
+                knee = math.sin(p) * 0.1  # 뒤
+            return hip, knee
+
+        l_hip, l_knee = calc_leg_joints(0)
+        self.left_hip.local_transform = self.left_hip.base_transform @ Mat4.from_rotation(l_hip, Vec3(1, 0, 0))
+        self.left_knee.local_transform = self.left_knee.base_transform @ Mat4.from_rotation(l_knee, Vec3(1, 0, 0))
+
+
+        r_hip, r_knee = calc_leg_joints(math.pi)
+        self.right_hip.local_transform = self.right_hip.base_transform @ Mat4.from_rotation(r_hip, Vec3(1, 0, 0))
+        self.right_knee.local_transform = self.right_knee.base_transform @ Mat4.from_rotation(r_knee, Vec3(1, 0, 0))
+
+        # Arm moving
+        arm_swing_amp = 0.4
+        elbow_base_flex = math.radians(-25)
+        elbow_swing_amp = math.radians(20)
+
+        l_arm_swing = -math.sin(phi) # amount left arm moved = amount right hip moved
+        self.left_shoulder.local_transform = self.left_shoulder.base_transform @ \
+                                             Mat4.from_rotation(l_arm_swing * arm_swing_amp, Vec3(1, 0, 0))
+        
+        l_elbow_rotation = elbow_base_flex - (l_arm_swing * elbow_swing_amp) # 팔꿈치 원래 구부러져 있음, 좀 더 구부렸다 폈다
+        self.left_elbow.local_transform = self.left_elbow.base_transform @ \
+                                          Mat4.from_rotation(l_elbow_rotation, Vec3(1, 0, 0))
+
+        r_arm_swing = math.sin(phi)
+        self.right_shoulder.local_transform = self.right_shoulder.base_transform @ \
+                                              Mat4.from_rotation(r_arm_swing * arm_swing_amp, Vec3(1, 0, 0))
+        
+        r_elbow_rotation = elbow_base_flex - (r_arm_swing * elbow_swing_amp)
+        self.right_elbow.local_transform = self.right_elbow.base_transform @ \
+                                           Mat4.from_rotation(r_elbow_rotation, Vec3(1, 0, 0))
+        
+        if (self.walk_last_time != None):
+            self.move_forward((time - self.walk_last_time) * walk_speed)
+        self.walk_last_time = time
+    
     def _idle_animation(self, time):
         """
         Idle animation (subtle head nodding, breast breathing, and arm spreading) **very cute!!!!!**
