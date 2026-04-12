@@ -1,3 +1,4 @@
+import math
 import pyglet
 from pyglet import window, app, shapes
 from pyglet.window import mouse,key
@@ -8,7 +9,8 @@ from pyglet.math import Mat4, Vec3
 from pyglet.gl import *
 
 import shader
-from primitives import CustomGroup
+from characters.primitives import CustomGroup
+from characters.pungpung_animation import wave_arms
 
 
 
@@ -22,8 +24,8 @@ class RenderWindow(pyglet.window.Window):
         '''
         View (camera) parameters
         '''
-        self.cam_eye = Vec3(0,2,4)
-        self.cam_target = Vec3(0,0,0)
+        self.cam_eye = Vec3(0,3,4)
+        self.cam_target = Vec3(0,0.7,0)
         self.cam_vup = Vec3(0,1,0)
         self.view_mat = None
         '''
@@ -35,9 +37,14 @@ class RenderWindow(pyglet.window.Window):
         self.proj_mat = None
 
         self.shapes = []
+        self.character_root = None
+        self.character_parts = []
         self.setup()
 
-        self.animate = False
+        self.animate = True
+        self.move_cam = False
+        self.cam_angle = 0.0
+        self.cam_radius = ((self.cam_eye.x - self.cam_target.x)**2 + (self.cam_eye.z - self.cam_target.z)**2)**0.5
 
     def setup(self) -> None:
         self.set_minimum_size(width = 400, height = 300)
@@ -61,22 +68,29 @@ class RenderWindow(pyglet.window.Window):
         self.batch.draw()
 
     def update(self,dt) -> None:
+        if self.move_cam:
+            # 1. update camera angle
+            self.cam_angle += dt
+            
+            # 2. new camera position
+            new_x = self.cam_target.x + self.cam_radius * math.sin(self.cam_angle)
+            new_z = self.cam_target.z + self.cam_radius * math.cos(self.cam_angle)
+            self.cam_eye = Vec3(new_x, self.cam_eye.y, new_z)
+            
+            # 3. new view matrix
+            self.view_mat = Mat4.look_at(self.cam_eye, target=self.cam_target, up=self.cam_vup)
+        
+        if self.animate:
+            # 4. update character animation
+            if self.character_root:
+                wave_arms(self.character_root, pyglet.clock.get_default().time())
+                self.character_root.update_world()
+                # update shapes transforms
+                for i, part in enumerate(self.character_parts):
+                    self.shapes[i].transform_mat = part.joint.world_transform @ part.local_model
+
         view_proj = self.proj_mat @ self.view_mat
         for i, shape in enumerate(self.shapes):
-            '''
-            Update position/orientation in the scene. In the current setting, 
-            shapes created later rotate faster while positions are not changed.
-            '''
-            if self.animate:
-                rotate_angle = dt
-                rotate_axis = Vec3(0,0,1)
-                rotate_mat = Mat4.from_rotation(angle = rotate_angle, vector = rotate_axis)
-                
-                shape.transform_mat @= rotate_mat
-
-                # # Example) You can control the vertices of shape.
-                # shape.indexed_vertices_list.vertices[0] += 0.5 * dt
-
             '''
             Update view and projection matrix. There exist only one view and projection matrix 
             in the program, so we just assign the same matrices for all the shapes
@@ -88,6 +102,13 @@ class RenderWindow(pyglet.window.Window):
         self.proj_mat = Mat4.perspective_projection(
             aspect = width/height, z_near=self.z_near, z_far=self.z_far, fov = self.fov)
         return pyglet.event.EVENT_HANDLED
+
+    def set_character(self, root, parts):
+        self.character_root = root
+        self.character_parts = parts
+        for part in parts:
+            transform = part.joint.world_transform @ part.local_model
+            self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
 
     def add_shape(self, transform, vertice, indice, color):
         

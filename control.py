@@ -28,6 +28,8 @@ class Control:
 
     def on_key_press(self, symbol, modifier):
         # TODO:
+        if symbol == pyglet.window.key.C:
+            self.window.move_cam = not self.window.move_cam
         pass
     
     def on_key_release(self, symbol, modifier):

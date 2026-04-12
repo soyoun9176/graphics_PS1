@@ -2,7 +2,8 @@ import pyglet
 from pyglet.math import Mat4, Vec3
 
 from render import RenderWindow
-from primitives import Cube,Sphere
+from characters.pungpung import create_pungpung
+from characters.pungpung_animation import wave_arms
 from control import Control
 
 
@@ -11,24 +12,14 @@ if __name__ == '__main__':
     height = 720
 
     # Render window.
-    renderer = RenderWindow(width, height, "Hello Pyglet", resizable = True)   
+    renderer = RenderWindow(width, height, "뿡뿡이", resizable=True)
     renderer.set_location(200, 200)
 
-    # Keyboard/Mouse control. Not implemented yet.
+    # Keyboard/Mouse control.
     controller = Control(renderer)
 
-    translate_mat1 = Mat4.from_translation(vector=Vec3(x=-2, y=0, z=0))
-    translate_mat2 = Mat4.from_translation(vector=Vec3(x=0, y=0, z=0))
-    translate_mat3 = Mat4.from_translation(vector=Vec3(x=2, y=0, z=0))
+    root, parts = create_pungpung()
+    renderer.set_character(root, parts)  # 캐릭터 설정
 
-    scale_vec = Vec3(x=1, y=1, z=1)
-
-    cube1 = Cube(scale_vec)
-    cube2 = Cube(Vec3(x=1.5, y=1.5, z=1.5))
-    sphere = Sphere(30,30)
-    renderer.add_shape(translate_mat1, cube1.vertices, cube1.indices, cube1.colors)
-    renderer.add_shape(translate_mat2, sphere.vertices, sphere.indices, sphere.colors)
-    renderer.add_shape(translate_mat3, cube2.vertices, cube1.indices, cube1.colors)
-
-    #draw shapes
+    # draw shapes
     renderer.run()
