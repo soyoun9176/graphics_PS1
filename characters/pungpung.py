@@ -26,6 +26,7 @@ class PungpungBase(Character):
         self.root = Joint("root")
         self.set_time = pyglet.clock.get_default().time()
         self.walk_last_time = None
+        self.speed = 0.7
         
         # Sound effects
         self.fart_sound_played = False
@@ -221,10 +222,10 @@ class PungpungBase(Character):
                                             Mat4.from_rotation(math.sin(dt * 3 + math.pi + math.pi/4) * 0.2, Vec3(1, 0, 0)))
 
     def _walk_animation(self, time):
-        stride_time = 1.2
+        walk_speed = self.speed
+        stride_time = (1.2 / walk_speed) * 0.7
         cycle = ((time - self.set_time) / stride_time) % 1.0
         phi = cycle * 2 * math.pi
-        walk_speed = 0.7
         def calc_leg_joints(phase_offset):
             p = (phi + phase_offset) % (2 * math.pi)
             hip = math.sin(p) * walk_speed
