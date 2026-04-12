@@ -224,6 +224,7 @@ class Pungpung(Character):
 
         if new_state != "mouth_fart":
             self._set_mouth_fart_eye_expression(False)
+        if (new_state == "walking") : self.walk_last_time = None
 
 
     def update_animation(self, time):

@@ -39,10 +39,7 @@ class RenderWindow(pyglet.window.Window):
         self.proj_mat = None
 
         self.shapes = []
-        self.character_root = None
-        self.character_parts = []
-        self.world = None
-        self.characters = []  # List of characters for multiple character support
+        self.world = World() # Initialize a world
         self.setup()
 
         self.animate = True
@@ -87,25 +84,13 @@ class RenderWindow(pyglet.window.Window):
         if self.animate:
             # 4. update character animation
             time = pyglet.clock.get_default().time()
-            if self.world:
-                self.world.update_all(time)
-                # Update shapes transforms for all characters in the world
-                shape_index = 0
-                for root, parts in self.world.get_all_roots_and_parts():
-                    for part in parts:
-                        self.shapes[shape_index].transform_mat = part.joint.world_transform @ part.local_model
-                        shape_index += 1
-            elif self.characters:
-                # Update all characters in the list
-                for character in self.characters:
-                    character.update_animation(time)
-                    character.update_world()
-                # Update shapes transforms for all characters
-                shape_index = 0
-                for character in self.characters:
-                    for part in character.parts:
-                        self.shapes[shape_index].transform_mat = part.joint.world_transform @ part.local_model
-                        shape_index += 1
+            self.world.update_all(time)
+            # Update shapes transforms for all characters in the world
+            shape_index = 0
+            for root, parts in self.world.get_all_roots_and_parts():
+                for part in parts:
+                    self.shapes[shape_index].transform_mat = part.joint.world_transform @ part.local_model
+                    shape_index += 1
 
         view_proj = self.proj_mat @ self.view_mat
         for i, shape in enumerate(self.shapes):
@@ -123,9 +108,9 @@ class RenderWindow(pyglet.window.Window):
 
     def set_character(self, character):
         """
-        Add a single character to the characters list.
+        Add a single character to the world.
         """
-        self.characters.append(character)
+        self.world.add_character(character)
         # Add shapes for the character
         for part in character.parts:
             transform = part.joint.world_transform @ part.local_model
@@ -143,9 +128,9 @@ class RenderWindow(pyglet.window.Window):
 
     def add_character(self, character: Character):
         """
-        Add a character to the renderer's character list.
+        Add a character to the world.
         """
-        self.characters.append(character)
+        self.world.add_character(character)
         # Add shapes for the new character
         for part in character.parts:
             transform = part.joint.world_transform @ part.local_model
@@ -153,11 +138,13 @@ class RenderWindow(pyglet.window.Window):
 
     def set_characters(self, characters_list):
         """
-        Set multiple characters at once.
+        Set multiple characters at once via the world.
         """
-        self.characters = characters_list
+        # Clear existing world and shapes
+        self.world = World()
         self.shapes.clear()
-        for character in self.characters:
+        for character in characters_list:
+            self.world.add_character(character)
             for part in character.parts:
                 transform = part.joint.world_transform @ part.local_model
                 self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)

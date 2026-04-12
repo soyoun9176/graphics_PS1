@@ -51,12 +51,9 @@ class Control:
 
     def _find_character_by_name(self, name):
         """
-        Find a character by name in the window's characters list.
+        Find a character by name in the window's world.
         """
-        for character in self.window.characters:
-            if character.name == name:
-                return character
-        return None
+        return self.window.world.get_character_by_name(name)
     
     def on_key_release(self, symbol, modifier):
         if symbol == pyglet.window.key.ESCAPE:
