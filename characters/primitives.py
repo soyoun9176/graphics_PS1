@@ -156,3 +156,38 @@ class Sphere:
 
         for i in range(num_triangles*3):
             self.indices.append(i)
+
+
+class Tetrahedron:
+    '''
+    default structure of tetrahedron (regular pyramid with 4 faces)
+    oriented to stand on the base in the XZ plane.
+    '''
+    def __init__(self, scale=(1.0, 1.0, 1.0)):
+        self.vertices = [
+            0.0, 1.0, 0.0,   
+            0.5, 0.0, 0.0,   
+            -0.25, 0.0, 0.433, 
+            -0.25, 0.0, -0.433 
+        ]
+        
+        scaled_vertices = []
+        for i in range(0, len(self.vertices), 3):
+            scaled_vertices.append(self.vertices[i] * scale[0])
+            scaled_vertices.append(self.vertices[i+1] * scale[1])
+            scaled_vertices.append(self.vertices[i+2] * scale[2])
+        self.vertices = scaled_vertices
+
+        self.indices = [
+            1, 3, 2,  # Base face
+            0, 1, 2,  # Side 1
+            0, 2, 3,  # Side 2
+            0, 3, 1   # Side 3
+        ]
+
+        self.colors = (
+            255, 60, 60, 255,   # V0
+            60, 255, 60, 255,   # V1
+            60, 60, 255, 255,   # V2
+            255, 255, 60, 255   # V3
+        )
