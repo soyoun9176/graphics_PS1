@@ -24,12 +24,32 @@ class Ground(StaticObject):
     """
     def __init__(self, size=20.0, color=(100, 100, 100, 255)):
         super().__init__("Ground")
-        mesh = Cube(scale=(size, 0.1, size))
-        self._solid_color(mesh, color)
         
-        # Position it slightly below zero to avoid z-fighting with character feet
-        self.root.local_transform = Mat4.from_translation(Vec3(0, -0.05, 0))
-        self.parts.append(Part(self.root, mesh))
+        # Stage Floor
+        floor_mesh = Cube(scale=(size, 0.1, size))
+        self._solid_color(floor_mesh, color)
+        # Floor is centered at (0, -0.05, 0)
+        self.parts.append(Part(self.root, floor_mesh, Mat4.from_translation(Vec3(0, -0.05, 0))))
+        
+        # Back Wall
+        wall_height = size * 0.5
+        wall_mesh = Cube(scale=(size, wall_height, 0.1))
+        # Slightly darker color for the wall
+        wall_color = tuple(max(0, c - 30) for c in color[:3]) + (color[3],)
+        self._solid_color(wall_mesh, wall_color)
+        
+        # Back Wall (Rear edge)
+        self.parts.append(Part(self.root, wall_mesh, Mat4.from_translation(Vec3(0, wall_height/2, -size/2))))
+        
+        # Left/Right Side Walls
+        side_wall_mesh = Cube(scale=(0.1, wall_height, size))
+        self._solid_color(side_wall_mesh, wall_color)
+        
+        # Left Wall
+        self.parts.append(Part(self.root, side_wall_mesh, Mat4.from_translation(Vec3(-size/2, wall_height/2, 0))))
+        # Right Wall
+        self.parts.append(Part(self.root, side_wall_mesh, Mat4.from_translation(Vec3(size/2, wall_height/2, 0))))
+        
         self.update_world()
 
     def _solid_color(self, primitive, color):

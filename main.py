@@ -23,10 +23,11 @@ if __name__ == '__main__':
     from characters.rig import Part
 
     # Create and add a light grey ground
-    ground = Ground(size=100.0, color=(111, 79, 40, 255))
+    ground = Ground(size=100.0, color=(255, 200, 200, 255)) # Ground(size=100.0, color=(111, 79, 40, 255))
     renderer.add_static_object(ground)
 
-    # Add random grass clumps
+    """
+    # Add grass
     from characters.static_object import Grass
     import random
     
@@ -43,6 +44,7 @@ if __name__ == '__main__':
         grass = Grass(scale=g_scale)
         grass.root.local_transform = Mat4.from_translation(Vec3(gx, 0, gz))
         renderer.add_static_object(grass)
+    """
 
     # Add the main character
     pungpung = Pungpung()
