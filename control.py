@@ -18,6 +18,9 @@ class Control:
         window.on_mouse_release = self.on_mouse_release
         window.on_mouse_scroll = self.on_mouse_scroll
         self.window = window
+        self.keys = key.KeyStateHandler()
+        window.push_handlers(self.keys)
+        pyglet.clock.schedule_interval(self.update_continuous_input, 1/60.0)
         self.setup()
 
     def setup(self):
@@ -46,6 +49,10 @@ class Control:
             pungpung = self._find_character_by_name("Pungpung")
             if pungpung:
                 pungpung.set_state("mouth_fart")
+        elif symbol == pyglet.window.key.B:
+            pungpung = self._find_character_by_name("Pungpung")
+            if pungpung:
+                pungpung.set_state("base_dance")
         elif symbol == pyglet.window.key.P:
             if self.window.camera_target_character:
                 self.window.camera_target_character = None
@@ -54,15 +61,27 @@ class Control:
                 pungpung = self._find_character_by_name("Pungpung")
                 if pungpung:
                     self.window.camera_target_character = pungpung
-        elif symbol == pyglet.window.key.RIGHT:
-            if (self.window.camera_target_character):
-                self.window.camera_target_character.root.local_transform = Mat4.from_rotation(-0.1, Vec3(0,1,0)) @ self.window.camera_target_character.root.local_transform
-                self.window.camera_target_character.update_world()
-        elif symbol == pyglet.window.key.LEFT:
-            if (self.window.camera_target_character):
-                self.window.camera_target_character.root.local_transform = Mat4.from_rotation(0.1, Vec3(0,1,0)) @ self.window.camera_target_character.root.local_transform
-                self.window.camera_target_character.update_world()
 
+
+
+    def update_continuous_input(self, dt):
+        """
+        Handle keys that need to be checked every frame (like rotation).
+        """
+        if not self.window.camera_target_character:
+            return
+
+        rotation_speed = 1.0 # radians per second
+        
+        if self.keys[key.LEFT]:
+            self.window.camera_target_character.root.local_transform = \
+                self.window.camera_target_character.root.local_transform @ Mat4.from_rotation(rotation_speed * dt, Vec3(0, 1, 0))
+            self.window.camera_target_character.update_world()
+        
+        if self.keys[key.RIGHT]:
+            self.window.camera_target_character.root.local_transform = \
+                self.window.camera_target_character.root.local_transform @ Mat4.from_rotation(-rotation_speed * dt, Vec3(0, 1, 0))
+            self.window.camera_target_character.update_world()
 
     def _find_character_by_name(self, name):
         """
