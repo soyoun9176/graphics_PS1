@@ -26,6 +26,13 @@ class Pungpung(Character):
         self.root = Joint("root")
         self.set_time = 0
         self.walk_last_time = None
+        
+        # Sound effects
+        self.fart_sound_played = False
+        try:
+            self.fart_sound = pyglet.media.load('sounds/pungsound_cute.mp3', streaming=False)
+        except Exception:
+            self.fart_sound = None
 
         body_color = (255, 145, 15, 255)
         arm_leg_color = (255, 165, 0, 255)
@@ -221,6 +228,7 @@ class Pungpung(Character):
         self._reset_pose()
         self.set_time = pyglet.clock.get_default().time()
         self.state = new_state
+        self.fart_sound_played = False
 
         if new_state != "mouth_fart":
             self._set_mouth_fart_eye_expression(False)
@@ -348,6 +356,10 @@ class Pungpung(Character):
             self.left_shoulder.local_transform = self.left_shoulder.base_transform @ Mat4.from_rotation(math.radians(-90 * ratio), Vec3(1, 0, 0))
             self.left_elbow.local_transform = self.left_elbow.base_transform @ Mat4.from_rotation(math.radians(-95 * ratio), Vec3(0.9, -0.55, 0))
         elif time_flewed < 4:
+            if not self.fart_sound_played and self.fart_sound:
+                self.fart_sound.play()
+                self.fart_sound_played = True
+                
             self.left_shoulder.local_transform = self.left_shoulder.base_transform @ Mat4.from_rotation(math.radians(-90), Vec3(1, 0, 0))
             self.left_elbow.local_transform = self.left_elbow.base_transform @ Mat4.from_rotation(math.radians(-95), Vec3(0.9, -0.55, 0))
         elif time_flewed < 6:
