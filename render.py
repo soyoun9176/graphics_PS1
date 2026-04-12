@@ -38,8 +38,10 @@ class RenderWindow(pyglet.window.Window):
         self.fov = 60
         self.proj_mat = None
 
-        self.shapes = []
-        self.world = World() # Initialize a world
+        self.static_shapes = []
+        self.character_shapes = []
+        self.world = World()
+        self._shape_counter = 0
         self.setup()
 
         self.animate = True
@@ -70,34 +72,33 @@ class RenderWindow(pyglet.window.Window):
 
     def update(self,dt) -> None:
         if self.move_cam:
-            # 1. update camera angle
+            # update camera angle
             self.cam_angle += dt
             
-            # 2. new camera position
+            # new camera position
             new_x = self.cam_target.x + self.cam_radius * math.sin(self.cam_angle*0.4)
             new_z = self.cam_target.z + self.cam_radius * math.cos(self.cam_angle*0.4)
             self.cam_eye = Vec3(new_x, self.cam_eye.y, new_z)
             
-            # 3. new view matrix
+            # new view matrix
             self.view_mat = Mat4.look_at(self.cam_eye, target=self.cam_target, up=self.cam_vup)
         
         if self.animate:
-            # 4. update character animation
+            # update character animation
             time = pyglet.clock.get_default().time()
-            self.world.update_all(time)
-            # Update shapes transforms for all characters in the world
-            shape_index = 0
-            for root, parts in self.world.get_all_roots_and_parts():
-                for part in parts:
-                    self.shapes[shape_index].transform_mat = part.joint.world_transform @ part.local_model
-                    shape_index += 1
+            self.world.update_characters(time)
+            
+            # sync character shapes with world transforms
+            for character, shapes in zip(self.world.characters, self.character_shapes):
+                for part, shape in zip(character.parts, shapes):
+                    shape.transform_mat = part.joint.world_transform @ part.local_model
 
         view_proj = self.proj_mat @ self.view_mat
-        for i, shape in enumerate(self.shapes):
-            '''
-            Update view and projection matrix. There exist only one view and projection matrix 
-            in the program, so we just assign the same matrices for all the shapes
-            '''
+        # update view-projection for all shapes
+        for shapes_list in self.character_shapes:
+            for shape in shapes_list:
+                shape.shader_program['view_proj'] = view_proj
+        for shape in self.static_shapes:
             shape.shader_program['view_proj'] = view_proj
 
     def on_resize(self, width, height):
@@ -110,58 +111,81 @@ class RenderWindow(pyglet.window.Window):
         """
         Add a single character to the world.
         """
-        self.world.add_character(character)
-        # Add shapes for the character
-        for part in character.parts:
-            transform = part.joint.world_transform @ part.local_model
-            self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
+        self.add_character(character)
 
     def set_world(self, world: World):
         self.world = world
         # Clear existing shapes
-        self.shapes.clear()
-        # Add all characters from the world
-        for root, parts in world.get_all_roots_and_parts():
-            for part in parts:
+        self.character_shapes.clear()
+        self.static_shapes.clear()
+        
+        # Add characters
+        for character in world.characters:
+            char_shapes = []
+            for part in character.parts:
                 transform = part.joint.world_transform @ part.local_model
-                self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
+                shape = self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
+                char_shapes.append(shape)
+            self.character_shapes.append(char_shapes)
+            
+        # Add static objects
+        for obj in world.static_objects:
+            for part in obj.parts:
+                transform = part.joint.world_transform @ part.local_model
+                shape = self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
+                self.static_shapes.append(shape)
 
     def add_character(self, character: Character):
         """
         Add a character to the world.
         """
         self.world.add_character(character)
+        char_shapes = []
         # Add shapes for the new character
         for part in character.parts:
             transform = part.joint.world_transform @ part.local_model
-            self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
+            shape = self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
+            char_shapes.append(shape)
+        self.character_shapes.append(char_shapes)
+
+    def add_static_object(self, obj):
+        """
+        Add a static object (e.g. ground, tree, box) to the scene.
+        """
+        self.world.add_static_object(obj)
+        # Add shapes for the static object
+        for part in obj.parts:
+            transform = part.joint.world_transform @ part.local_model
+            shape = self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
+            self.static_shapes.append(shape)
 
     def set_characters(self, characters_list):
         """
         Set multiple characters at once via the world.
         """
-        # Clear existing world and shapes
-        self.world = World()
-        self.shapes.clear()
+        # Clear existing character shapes
+        self.world.characters = []
+        self.character_shapes.clear()
         for character in characters_list:
-            self.world.add_character(character)
-            for part in character.parts:
-                transform = part.joint.world_transform @ part.local_model
-                self.add_shape(transform, part.primitive.vertices, part.primitive.indices, part.primitive.colors)
+            self.add_character(character)
 
     def add_shape(self, transform, vertice, indice, color):
         
         '''
         Assign a group for each shape
         '''
-        shape = CustomGroup(transform, len(self.shapes))
+        # Unique order for drawing sorting and to prevent group merging
+        order = self._shape_counter
+        self._shape_counter += 1
+        shape = CustomGroup(transform, order)
         shape.indexed_vertices_list = shape.shader_program.vertex_list_indexed(len(vertice)//3, GL_TRIANGLES,
                         batch = self.batch,
                         group = shape,
                         indices = indice,
                         vertices = ('f', vertice),
                         colors = ('Bn', color))
-        self.shapes.append(shape)
+        return shape
+
          
     def run(self):
         pyglet.clock.schedule_interval(self.update, 1/60)

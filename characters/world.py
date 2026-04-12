@@ -2,11 +2,11 @@ from characters.character import Character
 
 class World:
     """
-    Manages multiple characters in the game world.
-    Provides methods to add, remove, and update characters.
+    Manages characters and static objects in the world.
     """
     def __init__(self):
-        self.characters = []  # List of Character objects
+        self.characters = []
+        self.static_objects = []
 
     def add_character(self, character: Character):
         """
@@ -15,29 +15,45 @@ class World:
         if isinstance(character, Character):
             self.characters.append(character)
         else:
-            raise TypeError("Only Character instances can be added to the world")
+            raise TypeError("Only Character instances can be added via add_character")
+
+    def add_static_object(self, obj):
+        self.static_objects.append(obj)
+        obj.update_world()
 
     def remove_character(self, character: Character):
-        """
-        Remove a character from the world.
-        """
         if character in self.characters:
             self.characters.remove(character)
 
-    def update_all(self, time):
+    def remove_static_object(self, obj):
+        if obj in self.static_objects:
+            self.static_objects.remove(obj)
+
+    def update_characters(self, time):
         """
-        Update all characters in the world.
+        Update animation and world transforms for characters only.
         """
         for character in self.characters:
             character.update_animation(time)
             character.update_world()
 
-    def get_all_roots_and_parts(self):
+    def get_all_characters_parts(self):
         """
-        Get root joints and parts for all characters.
-        Returns a list of (root, parts) tuples.
+        Returns a list of parts for all characters.
         """
-        return [character.get_root_and_parts() for character in self.characters]
+        parts = []
+        for character in self.characters:
+            parts.extend(character.get_root_and_parts()[1])
+        return parts
+
+    def get_all_static_parts(self):
+        """
+        Returns a list of parts for all static objects.
+        """
+        parts = []
+        for obj in self.static_objects:
+            parts.extend(obj.get_root_and_parts()[1])
+        return parts
 
     def get_character_by_name(self, name):
         """

@@ -17,8 +17,18 @@ if __name__ == '__main__':
     # Keyboard/Mouse control.
     controller = Control(renderer)
 
-    pungpung = Pungpung()
-    renderer.set_character(pungpung)  # 캐릭터 설정
+    # Setup World Environment
+    from characters.static_object import Ground, StaticObject
+    from characters.primitives import Cube
+    from characters.rig import Part
 
-    # draw shapes
+    # Create and add a green ground
+    ground = Ground(size=200.0, color=(255, 255, 255, 255))
+    renderer.add_static_object(ground)
+
+    # Add the main character
+    pungpung = Pungpung()
+    renderer.set_character(pungpung) 
+
+    # Run the application
     renderer.run()
