@@ -50,5 +50,19 @@ if __name__ == '__main__':
     pungpung = Pungpung()
     renderer.set_character(pungpung) 
 
+    # Add Pungpung's friends at specified positions
+    from characters.pungpung import FriendPung
+    friend_configs = [
+        ("Friend1", (-6, 0, -30), (150, 255, 150, 255)), # Mint
+        ("Friend2", (-3, 0, -30), (200, 150, 255, 255)), # Lavender
+        ("Friend3", (3, 0, -30), (150, 200, 255, 255)),  # Sky
+        ("Friend4", (6, 0, -30), (255, 255, 150, 255))   # Lemon
+    ]
+
+    for name, pos, color in friend_configs:
+        friend = FriendPung(name=name, body_color=color)
+        friend.root.local_transform = Mat4.from_translation(Vec3(*pos))
+        renderer.add_character(friend)
+
     # Run the application
     renderer.run()
