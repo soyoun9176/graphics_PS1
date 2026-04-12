@@ -224,7 +224,7 @@ class PungpungBase(Character):
         stride_time = 1.2
         cycle = ((time - self.set_time) / stride_time) % 1.0
         phi = cycle * 2 * math.pi
-        walk_speed = 0.35
+        walk_speed = 0.7
         def calc_leg_joints(phase_offset):
             p = (phi + phase_offset) % (2 * math.pi)
             hip = math.sin(p) * walk_speed

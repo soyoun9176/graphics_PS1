@@ -71,7 +71,7 @@ class Control:
         if not self.window.camera_target_character:
             return
 
-        rotation_speed = 1.0 # radians per second
+        rotation_speed = 0.5
         
         if self.keys[key.LEFT]:
             self.window.camera_target_character.root.local_transform = \
