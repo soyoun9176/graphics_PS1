@@ -39,3 +39,25 @@ class Character:
     def move_forward(self, amount :float):
         self.root.local_transform = Mat4.from_translation(self.get_forward_vector() * amount) @ self.root.local_transform
         self.update_world()
+
+    def get_camera_matrix(self):
+        """
+        Calculate a view matrix that looks at the character from behind and above.
+        Uses the character's forward vector and root position.
+        """
+        if self.root is None:
+            return Mat4()
+            
+        char_pos = Vec3(self.root.world_transform[12], self.root.world_transform[13], self.root.world_transform[14])
+        
+        forward = self.get_forward_vector()
+        up = Vec3(0, 1, 0)
+        
+        distance_behind = 8.0
+        height_above = 4.0
+        
+        eye = char_pos - (forward * distance_behind) + (up * height_above)
+        
+        target = char_pos + (up * 1.5)
+        
+        return Mat4.look_at(eye, target, up)

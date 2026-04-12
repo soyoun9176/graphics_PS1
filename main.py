@@ -23,7 +23,7 @@ if __name__ == '__main__':
     from characters.rig import Part
 
     # Create and add a green ground
-    ground = Ground(size=200.0, color=(255, 255, 255, 255))
+    ground = Ground(size=200.0, color=(200, 200, 200, 255))
     renderer.add_static_object(ground)
 
     # Add the main character

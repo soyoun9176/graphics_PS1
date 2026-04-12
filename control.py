@@ -46,8 +46,23 @@ class Control:
             pungpung = self._find_character_by_name("Pungpung")
             if pungpung:
                 pungpung.set_state("mouth_fart")
+        elif symbol == pyglet.window.key.P:
+            if self.window.camera_target_character:
+                self.window.camera_target_character = None
+                self.window.view_mat = Mat4.look_at(self.window.cam_eye, target=self.window.cam_target, up=self.window.cam_vup)
+            else:
+                pungpung = self._find_character_by_name("Pungpung")
+                if pungpung:
+                    self.window.camera_target_character = pungpung
+        elif symbol == pyglet.window.key.RIGHT:
+            if (self.window.camera_target_character):
+                self.window.camera_target_character.root.local_transform = Mat4.from_rotation(-0.1, Vec3(0,1,0)) @ self.window.camera_target_character.root.local_transform
+                self.window.camera_target_character.update_world()
+        elif symbol == pyglet.window.key.LEFT:
+            if (self.window.camera_target_character):
+                self.window.camera_target_character.root.local_transform = Mat4.from_rotation(0.1, Vec3(0,1,0)) @ self.window.camera_target_character.root.local_transform
+                self.window.camera_target_character.update_world()
 
-        pass
 
     def _find_character_by_name(self, name):
         """

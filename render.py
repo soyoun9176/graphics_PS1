@@ -42,6 +42,7 @@ class RenderWindow(pyglet.window.Window):
         self.character_shapes = []
         self.world = World()
         self._shape_counter = 0
+        self.camera_target_character = None # If set, camera follows this character
         self.setup()
 
         self.animate = True
@@ -71,7 +72,11 @@ class RenderWindow(pyglet.window.Window):
         self.batch.draw()
 
     def update(self,dt) -> None:
-        if self.move_cam:
+        if self.camera_target_character:
+            # Sync root's world transform before getting camera matrix
+            self.camera_target_character.update_world()
+            self.view_mat = self.camera_target_character.get_camera_matrix()
+        elif self.move_cam:
             # update camera angle
             self.cam_angle += dt
             
