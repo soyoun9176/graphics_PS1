@@ -362,9 +362,16 @@ class FriendPung(PungpungBase):
         self.head_skin_color = (255, 224, 189, 255) # 살색
         self.blush_pink = (255, 182, 193, 255)       # 핑크
         self.mouth_red = (255, 50, 50, 255)          # 빨강
-        super().__init__(name=name, 
+        super().__init__(
+                        name=name, 
                         body_color=body_color, 
-                        arm_leg_color=(min(body_color[0], 255), min(body_color[1], 255), min(body_color[1], 255), 255))
+                        arm_leg_color=(
+                                        min(body_color[0], 255), 
+                                        min(body_color[1], 255), 
+                                        min(body_color[1], 255), 
+                                        255
+                                        )
+                        )
 
     def _build_head(self):
         self.head_base = Joint("head_base", parent=self.torso)
