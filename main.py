@@ -33,16 +33,21 @@ if __name__ == '__main__':
     # Add Pungpung's friends at specified positions
     from characters.pungpung import FriendPung
     friend_configs = [
-        ("Friend1", (-6, 0, -15), (150, 255, 150, 255)), # Mint
-        ("Friend2", (-3, 0, -15), (200, 150, 255, 255)), # Lavender
-        ("Friend3", (3, 0, -15), (150, 200, 255, 255)),  # Sky
-        ("Friend4", (6, 0, -15), (255, 255, 150, 255))   # Lemon
+        ("Friend1", (-6, 0, -5), (150, 255, 150, 255)), # Mint
+        ("Friend2", (-3, 0, -5), (200, 150, 255, 255)), # Lavender
+        ("Friend3", (3, 0, -5), (150, 200, 255, 255)),  # Sky
+        ("Friend4", (6, 0, -5), (255, 255, 150, 255))   # Lemon
     ]
 
     for name, pos, color in friend_configs:
         friend = FriendPung(name=name, body_color=color)
         friend.root.local_transform = Mat4.from_translation(Vec3(*pos))
         renderer.add_character(friend)
+
+    renderer.world.get_character_by_name("Friend1").update_target(Vec3(6, 0, 0))
+    renderer.world.get_character_by_name("Friend2").update_target(Vec3(3, 0, 0))
+    renderer.world.get_character_by_name("Friend3").update_target(Vec3(-3, 0, 0))
+    renderer.world.get_character_by_name("Friend4").update_target(Vec3(-6, 0, 0))
 
     # Run the application
     renderer.run()

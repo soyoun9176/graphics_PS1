@@ -72,16 +72,20 @@ class Control:
             return
 
         rotation_speed = 0.5
+        char = self.window.camera_target_character
         
-        if self.keys[key.LEFT]:
-            self.window.camera_target_character.root.local_transform = \
-                self.window.camera_target_character.root.local_transform @ Mat4.from_rotation(rotation_speed * dt, Vec3(0, 1, 0))
-            self.window.camera_target_character.update_world()
-        
-        if self.keys[key.RIGHT]:
-            self.window.camera_target_character.root.local_transform = \
-                self.window.camera_target_character.root.local_transform @ Mat4.from_rotation(-rotation_speed * dt, Vec3(0, 1, 0))
-            self.window.camera_target_character.update_world()
+        if self.keys[key.LEFT] or self.keys[key.RIGHT]:
+            # To use turn_twards for manual keys, we create a temporary relative target
+            world_mat = char.root.world_transform
+            char_pos = Vec3(world_mat[12], world_mat[13], world_mat[14])
+            local_right = Vec3(world_mat[0], world_mat[1], world_mat[2])
+            
+            if self.keys[key.RIGHT]:
+                # Target is to the LEFT of the character
+                char.turn_twards(rotation_speed * dt, char_pos - local_right)
+            else:
+                # Target is to the RIGHT of the character
+                char.turn_twards(rotation_speed * dt, char_pos + local_right)
 
     def _find_character_by_name(self, name):
         """

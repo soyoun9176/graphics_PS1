@@ -1,4 +1,5 @@
 from pyglet.math import Mat4, Vec3
+import math
 
 
 class Character:
@@ -7,9 +8,9 @@ class Character:
     Provides common interface for rendering and animation.
     """
     def __init__(self):
-        self.root = None  # Root joint of the character
-        self.parts = []   # List of Part objects for rendering
-        self.name = "Character"  # Character name for identification
+        self.root = None
+        self.parts = []
+        self.name = "Character"
 
     def update_animation(self, time):
         """
@@ -61,3 +62,29 @@ class Character:
         target = char_pos + (up * 1.5)
         
         return Mat4.look_at(eye, target, up)
+
+    def turn_twards(self, amount, target_pos: Vec3):
+        """
+        turn the character towards the target position.
+        """
+        if self.root is None:
+            return
+
+        target_direction = Vec3(target_pos[0] - self.root.local_transform[12], 
+                               target_pos[1] - self.root.local_transform[13], 
+                               target_pos[2] - self.root.local_transform[14])
+        
+        if target_direction.length() < 0.001:
+            return
+        target_direction = target_direction.normalize()
+        
+        current_direction_right = Vec3(self.root.local_transform[0], self.root.local_transform[1], self.root.local_transform[2]).normalize()
+        
+        if target_direction.dot(current_direction_right) > 0:
+            self.root.local_transform = self.root.local_transform @ Mat4.from_rotation(amount, Vec3(0, 1, 0))
+        else:
+            self.root.local_transform = self.root.local_transform @ Mat4.from_rotation(-amount, Vec3(0, 1, 0))
+            
+        self.update_world()
+
+        
