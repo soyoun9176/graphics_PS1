@@ -75,6 +75,9 @@ class World:
             friends.append(character)
         
         friends_pos, friends_dirs = pungpung.get_friends_position_and_direction()
-        for i in range(4):
-            friends[i].update_target(friends_pos[i], friends_dirs[i])
-            
+
+        def _start_moving(dt):
+            for i in range(4):
+                friends[i].update_target(friends_pos[i], friends_dirs[i])
+        
+        return _start_moving
