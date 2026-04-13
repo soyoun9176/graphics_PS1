@@ -59,6 +59,7 @@ class PungpungBase(Character):
         self.speed = 0.7
         self.walk_target = None
         self.walk_direction = 1
+        self.target_direction = None
         
         # Sound effects
         self.fart_sound_played = False
@@ -207,16 +208,19 @@ class PungpungBase(Character):
             if (self.walk_target):
                 current_position = Vec3(self.root.world_transform[12], self.root.world_transform[13], self.root.world_transform[14])
                 if (self.walk_target - current_position).length() < 0.1:
-                    self.set_state("base_dance")
+                    if self.target_direction: self.set_state("turning")
+                    else: self.set_state("base_dance")
                     self.walk_target = None
                 else: self.turn_twards(0.5 / 60 ,self.walk_target)
             self._walk_animation(time)
+        elif self.state == "turning": self._turn()
         elif self.state == "idle": self._idle_animation(time)
         elif self.state == "mouth_fart": self._mouth_fart(time)
         elif self.state == "base_dance": self._base_dance(time)
     
-    def update_target(self, target_pos: Vec3):
+    def update_target(self, target_pos: Vec3, target_direction : Vec3 = None):
         self.walk_target = target_pos
+        self.target_direction = target_direction
         self.walk_direction = 1
         self.set_state("walking")
 
@@ -335,6 +339,32 @@ class PungpungBase(Character):
         self.left_elbow.local_transform = self.left_elbow.base_transform @ Mat4.from_rotation(math.radians(75), Vec3(0, 0, 1))
         self.right_elbow.local_transform = self.right_elbow.base_transform @ Mat4.from_rotation(math.radians(-75), Vec3(0, 0, 1))
 
+    def _turn(self):
+        if self.target_direction is None:
+            self.set_state("idle")
+            return
+
+        # current direction and new direction
+        current_dir = self.get_forward_vector()
+        c_dir_2d = Vec3(current_dir.x, 0, current_dir.z).normalize()
+        t_dir_2d = Vec3(self.target_direction.x, 0, self.target_direction.z).normalize()
+
+        turn_amount = 0.5 / 60.0
+
+        # calculate angle -> if smaller than turn_amount no turn
+        dot_val = max(-1.0, min(1.0, c_dir_2d.dot(t_dir_2d)))
+        angle_diff = math.acos(dot_val)
+
+        if angle_diff <= turn_amount:
+            self.target_direction = None
+            self.set_state("base_dance")
+        else:
+            target_coordinate = Vec3(self.root.world_transform[12], 
+                                    self.root.world_transform[13], 
+                                    self.root.world_transform[14])
+            target_coordinate = target_coordinate + t_dir_2d
+            self.turn_twards(turn_amount, target_coordinate)
+
 class Pungpung(PungpungBase):
     def __init__(self):
         super().__init__(name="Pungpung")
@@ -359,7 +389,7 @@ class FriendPung(PungpungBase):
     A simpler friend variation of Pungpung with custom features.
     """
     def __init__(self, name="FriendPung", body_color=(255, 200, 200, 255)):
-        self.head_skin_color = (255, 224, 189, 255) # 살색
+        self.head_skin_color = (255, 224, 189, 255)  # 살색
         self.blush_pink = (255, 182, 193, 255)       # 핑크
         self.mouth_red = (255, 50, 50, 255)          # 빨강
         super().__init__(
