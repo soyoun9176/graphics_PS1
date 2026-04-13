@@ -49,6 +49,7 @@ class Control:
             pungpung = self._find_character_by_name("Pungpung")
             if pungpung:
                 pungpung.set_state("mouth_fart")
+                self.window.world.pungpung_friends_dance()
         elif symbol == pyglet.window.key.B:
             pungpung = self._find_character_by_name("Pungpung")
             if pungpung:

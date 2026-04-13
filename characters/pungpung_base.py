@@ -341,7 +341,7 @@ class PungpungBase(Character):
 
     def _turn(self):
         if self.target_direction is None:
-            self.set_state("idle")
+            self.set_state("base_dance")
             return
 
         # current direction and new direction

@@ -44,10 +44,6 @@ if __name__ == '__main__':
         friend.root.local_transform = Mat4.from_translation(Vec3(*pos))
         renderer.add_character(friend)
 
-    renderer.world.get_character_by_name("Friend1").update_target(Vec3(6, 0, 0), Vec3(0,0,1))
-    renderer.world.get_character_by_name("Friend2").update_target(Vec3(3, 0, 0), Vec3(0,0,1))
-    renderer.world.get_character_by_name("Friend3").update_target(Vec3(-3, 0, 0), Vec3(0,0,1))
-    renderer.world.get_character_by_name("Friend4").update_target(Vec3(-6, 0, 0), Vec3(0,0,1))
 
     # Run the application
     renderer.run()

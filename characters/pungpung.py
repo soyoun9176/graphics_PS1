@@ -21,6 +21,33 @@ class Pungpung(PungpungBase):
         self.parts.extend(h_parts)
         
         self._register_eyes(h_eyes, h_alt_eyes)
+    
+    def get_friends_position_and_direction(self):
+        """
+        get position and direction for friends dancing
+        returns:
+        friends_pos, friends_dirs : list of Vec3
+        """
+        pp_position = Vec3(self.root.world_transform[12], 
+                        self.root.world_transform[13], 
+                        self.root.world_transform[14])
+        pp_right_direction = Vec3(self.root.world_transform[0], 
+                        self.root.world_transform[1], 
+                        self.root.world_transform[2]).normalize()
+        pp_front_direction = Vec3(self.root.world_transform[8], 
+                        self.root.world_transform[9], 
+                        self.root.world_transform[10]).normalize()
+        friend_position_offsets = [-4,-2,2,4]
+        friends_pos = []
+        friends_dirs = []
+        
+        for offset in friend_position_offsets:
+            position = pp_position + (offset*pp_right_direction)
+            friends_pos.append(position)
+            friends_dirs.append(pp_front_direction)
+        return friends_pos, friends_dirs
+
+
 
 def create_pungpung():
     p = Pungpung()
