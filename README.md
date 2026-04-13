@@ -1,25 +1,136 @@
+# 뿡뿡이 친구부르기 시뮬레이션
+어릴적 제가 가장 좋아하던 프로그램인 "방귀대장 뿡뿡이"의 뿡뿡이와, 그 친구들이 등장하는 시뮬레이션입니다.
+(뿡뿡이의 친구들은 뿡뿡이 방청을 하러 간 아이들로 구성되어 있습니다.)
+![뿡뿡이와 친구들](/images/image.png)
 
-## Requirements
+# 실행 방법
+## 환경 조건 
+Python 3.14.4, pyglet 2.1.14에서 실행합니다.
+Python 버전의 경우 pyglet 2.1.14만 구동 가능하다면 다른 버전도 괜찮은 것으로 파악하고 있습니다.
+```bash
+python -m venv venv
+source venv/bin/activate # Macbook 기준, windows 기준으로는 venv/Scripts/activate
+pip install pyglet==2.1.14
+```
+* 프로그램 내에 소리가 저장되어 있습니다. 소리를 켜고 보시면 더 재밌습니다!
 
-This is a baseline code for **SNU Computer Graphics (4190.410)**.
-This code uses [Pyglet](https://github.com/pyglet/pyglet) which is a cross-platform windowing library under Python 3.8+. 
-Supported platforms are:
+## 프로그램 시작
+```bash
+python main.py
+```
+프로그램 시작 시 핑크색 방 위에 뿡뿡이와 친구뿡이들이 서있는 상태입니다.
 
-* Windows 7 or later
-* Mac OS X 10.3 or later
-* Linux, with the following libraries (most recent distributions will have these in a default installation):
+## 캐릭터 및 카메라 조작
+### 카메라 조작
+* 주의: 한글 타자 모드에서 조작하는 경우 조작이 불가할 수 있습니다. 반드시 영어 타자 모드에서 사용하시기 바랍니다.
+#### 관전 모드
+원점을 기준으로 카메라의 위치를 이동시킵니다.
+w, a, s, d 키와 z, x 키를 통해 카메라를 조작하실 수 있습니다.
+w: 카메라를 위로 올리기
+s: 카메라를 아래로 내리기
+a: 카메라 왼쪽으로 회전
+d: 카메라 오른쪽으로 회전
+z: zoom in
+x: zoom out
 
-## Installation
-Pyglet is installable from PyPI:
+#### 뿡뿡이 3인칭 모드
+뿡뿡이 뒤쪽으로 시점이 고정되어 있는 모드입니다. 카메라는 따로 조작하실 수 없습니다.
+p 키를 눌러 뿡뿡이 3인칭 모드에 진입/해제하실 수 있습니다.
+위쪽 화살표: 뿡뿡이가 (뿡뿡이 기준)뒤로 갑니다.
+아래쪽 화살표: 뿡뿡이가 (뿡뿡이 기준)앞으로 갑니다.
+왼쪽 화살표: 뿡뿡이가 시계방향으로 돕니다.
+오른쪽 화살표: 뿡뿡이가 반시계방향으로 돕니다.
 
-    pip install --upgrade --user pyglet
+### 뿡뿡이 특별 행동
+#### 무릎 춤추기
+B 키를 눌러 뿡뿡이가 허리에 손을 얹고 춤을 추게 할 수 있습니다.
 
-And then clone this repository:
+#### 친구 부르기
+M 키를 눌러 뿡뿡이가 친구뿡이들을 부르게 할 수 있습니다.
+이 때, 뿡뿡이 양옆으로 친구뿡이들이 줄지어 모여서 춤을 추게 됩니다. 
 
-    git clone https://github.com/IntelligentMOtionlab/SNU_ComputerGraphics.git
+#### 친구 보내주기
+친구뿡이들이 춤을 그만 추고 자유롭게 움직일 수 있게 하고싶다면 F 키를 누르시면 됩니다.
 
-You can implement the code easily by:
 
-    python3 main.py
-You can then see the result, as shown in the image below.
-![image](https://github.com/IntelligentMOtionlab/SNU_ComputerGraphics/assets/132187116/38b872fd-b818-4731-b025-d264173b974c)
+# 구현사항
+## 구현한 사항
+### 뿡뿡이의 관절 구성
+characters/pungpung_base.py에 정의되어 있습니다.
+```plain text
+root (Root Joint)
+└── torso (몸통 중심점)
+    ├── belly (배)
+    ├── breast (가슴)                              # 뿡뿡이는 가슴에 비해 배가 많이 나와있어 구 두개로 구현
+    ├── head_base (머리 지지점)
+    │   └── placeholder_head (머리 모델링 연결점)     # 머리는 구성요소가 많아 별개 객체로 빼서 관리
+    │
+    ├── left_shoulder (왼쪽 어깨)
+    │   └── left_elbow (왼쪽 팔꿈치)
+    │       └── left_hand (왼쪽 손)
+    │
+    ├── right_shoulder (오른쪽 어깨)
+    │   └── right_elbow (오른쪽 팔꿈치)
+    │       └── right_hand (오른쪽 손)              # 팔 길이 관련 constant 묶어 길이 조정
+    │
+    ├── left_hip (왼쪽 골반)
+    │   └── left_knee (왼쪽 무릎)
+    │       └── left_foot (왼쪽 발)
+    │
+    └── right_hip (오른쪽 골반)
+        └── right_knee (오른쪽 무릎)
+            └── right_foot (오른쪽 발)              # 다리 길이 관련 constant 묶어 길이 조정
+```
+root joint가 child joint들을 들고 있는 재귀적 구조로 구성했으며, 랜더링되어야 하는 도형은 Part class에 저장 후 Part의 field로서 joint를 저장하고 있습니다.
+전반적으로 구현의 단순함을 위해 다리는 x축을 축으로 하는 방향으로만 움직이도록 하였습니다.
+팔 움직임의 경우 동작마다 팔 joint의 rotation 방향이 다릅니다.
+
+### 뿡뿡이 및 친구뿡이 움직임 관련
+#### idle state (숨쉬기)
+뿡뿡이가 idle state에 있을 때 미세하게 숨을 쉬는 동작을 추가했습니다.(큰 의미는 없지만 정말 귀엽기 때문입니다.)
+동일한 주기를 갖고
+- 배와 가슴이 커졌다 작아졌다 하는 동작
+- 고개가 올라갔다 내려갔다 하는 동작
+- 손이 벌어졌다 좁아졌다가 하는 동작
+을 구현하였습니다.
+
+#### walking state (걷기)
+뿡뿡이/친구뿡이가 걸어다닐 때 팔, 다리가 움직이는 동작과 앞으로 전진하는 동작을 구현했습니다.
+sin 값을 이용해 주기성을 구현했습니다.
+무릎 각도의 경우 무릎이 구부러지는 각도가 방향에 따라 차이가 있는 것을 반영해보고자 했고, 팔꿈치 각도를 함께 조정하여 조금 더 자연스럽게 나오도록 하였습니다. 이 부분의 경우 검색을 통해 구현 방법에 도움을 받았습니다.
+또한, 팔의 위상과 다리의 위상이 반대가 되도록 하여 자연스러운 걸음을 표현하고자 했습니다.
+
+걸어서 이동하는 방향의 경우 객체 transform matrix의 rotation 파트를 참조하여 앞 방향을 구하고, 해당 방향으로 움직이는 구현을 했습니다. 
+
+#### target 두고 걷기
+target 방향으로 움직이는 기능이 추가되어 있습니다.
+정확히는, target 방향으로의 회전 + 앞으로 걷기를 동시에 진행합니다.
+
+#### random target 설정하기
+따로 움직임을 지정하지 않은 초기 상황에 뿡뿡이가 자유롭게 움직이도록 하는 기능입니다. 월드 내에 랜덤 위치를 목표지점으로 두고 친구뿡이가 이동합니다. 랜덤 위치는 10초마다 바뀝니다.
+
+#### mouth_fart 입으로 방귀 뀌기
+팔을 입 앞으로 가져와서 입으로 방귀를 뀌는 모션을 구현하였습니다.
+기본적으로 테스트를 통해 입 앞에 가져와지는 팔의 각도를 구현하였고, interpolation을 통해 사이 모션이 자연스럽도록 구현하였습니다.
+또한, 소리를 추가하여 현실감을 더했습니다.
+
+#### base_dance 무릎 구부리며 춤추기
+뿡뿡이가 손을 허리에 올리고 무릎을 구부리며 춤을 추는 행동 입니다. 손을 허리에 올리는 동작을 구현하기 위해 z축을 축으로 하는 rotation을 가정하고 테스트를 통해 적절한 어깨/팔꿈치 관절의 rotation 각도를 구했습니다.
+
+### 월드 구성
+world라는 클래스를 두어 움직이지 않는 static_object들과 character들을 관리하도록 했습니다. 이 외에 캐릭터간의 상호작용 또한 world 클래스가 관리합니다.
+
+
+## 구현하지 못한 사항
+### 친구뿡이 움직임 관련
+친구뿡이의 움직임 궤도는 target_position으로의 방향과 target_position으로 일정 각도 돌아가는 움직임을 통해 정의됩니다. 종종 뿡뿡이의 방향이 target_position을 바라보고 있지 않은 상황에서 target_position이 너무 가까운 경우 뿡뿡이가 타원 궤도를 돌며 목적지에 도착하지 못하는 현상이 발생합니다. 이러한 현상을 각도 변경 속도 조절을 통해 해결하고자 하였으나, 구현에 시간이 부족하여 완성하지 못했습니다.
+
+### 짜잔형/번개맨
+방귀대장 뿡뿡이에는 원래 꽤 큰 비중을 차지하는 캐릭터로서 짜잔형/번개맨이 등장합니다. 처음엔 친구뿡이들 대신 입 방귀를 통해 짜잔형을 부르도록 하고자 하였으나, 짜잔형/번개맨은 귀엽게 생기지 않아서 모델링을 새로 해야 하는 문제가 있어 구현하지 않기로 하였습니다.
+
+# Screenshot of if the program ran properly
+![랜덤으로 돌아다니는 친구뿡이들](/images/image2.png)
+![뿡뿡이가 불러서 춤추러 온 친구뿡이들](/images/image3.png)
+
+# Reference
+* 방귀 사운드 : https://pgtd.tistory.com/175 사이트의 "귀여운 방귀 소리"를 사용하였습니다

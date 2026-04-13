@@ -56,7 +56,7 @@ class PungpungBase(Character):
         self.root = Joint("root")
         self.set_time = pyglet.clock.get_default().time()
         self.walk_last_time = None
-        self.speed = 1.3
+        self.speed = 0.7
         self.walk_target = None
         self.walk_direction = 1
         self.target_direction = None
@@ -207,11 +207,11 @@ class PungpungBase(Character):
         elif self.state == "walking": 
             if (self.walk_target):
                 current_position = Vec3(self.root.world_transform[12], self.root.world_transform[13], self.root.world_transform[14])
-                if (self.walk_target - current_position).length() < 0.1:
+                if (self.walk_target - current_position).length() < 0.2:
                     if self.target_direction: self.set_state("turning")
                     else: self.set_state("idle")
                     self.walk_target = None
-                else: self.turn_twards(0.5 / 60 ,self.walk_target)
+                else: self.turn_twards(2 / 60 ,self.walk_target)
             self._walk_animation(time)
         elif self.state == "turning": self._turn()
         elif self.state == "idle": self._idle_animation(time)

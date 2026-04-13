@@ -43,7 +43,7 @@ class Control:
                 if pungpung:
                     self.window.camera_target_character = pungpung
         elif symbol == pyglet.window.key.F:
-            names = ["Friend1", "Friend2", "Friend3", "Friend3"]
+            names = ["Friend1", "Friend2", "Friend3", "Friend4"]
             for name in names:
                 character = self.window.world.get_character_by_name(name)
                 if (character == None) :continue
