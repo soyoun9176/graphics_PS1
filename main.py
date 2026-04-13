@@ -33,10 +33,10 @@ if __name__ == '__main__':
     # Add Pungpung's friends at specified positions
     from characters.pungpung import FriendPung
     friend_configs = [
-        ("Friend1", (-6, 0, -30), (150, 255, 150, 255)), # Mint
-        ("Friend2", (-3, 0, -30), (200, 150, 255, 255)), # Lavender
-        ("Friend3", (3, 0, -30), (150, 200, 255, 255)),  # Sky
-        ("Friend4", (6, 0, -30), (255, 255, 150, 255))   # Lemon
+        ("Friend1", (-6, 0, -15), (150, 255, 150, 255)), # Mint
+        ("Friend2", (-3, 0, -15), (200, 150, 255, 255)), # Lavender
+        ("Friend3", (3, 0, -15), (150, 200, 255, 255)),  # Sky
+        ("Friend4", (6, 0, -15), (255, 255, 150, 255))   # Lemon
     ]
 
     for name, pos, color in friend_configs:
