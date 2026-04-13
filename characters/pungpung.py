@@ -57,6 +57,7 @@ class PungpungBase(Character):
         self.set_time = pyglet.clock.get_default().time()
         self.walk_last_time = None
         self.speed = 0.7
+        self.walk_target = None
         
         # Sound effects
         self.fart_sound_played = False
@@ -144,7 +145,7 @@ class PungpungBase(Character):
             knee.base_transform = Mat4.from_translation(Vec3(0, -LEG_THIGH_LEN, KNEE_OFFSET_Z))
             shin = Sphere(18, 18, 1.0)
             _solid_color(shin, body_color)
-            self.parts.append(Part(knee, shin, Mat4.from_translation(Vec3(0, -LEG_CALF_LEN / 2, 0)) @ Mat4.from_scale(Vec3(LEG_THICK*0.85, (LEG_CALF_LEN / 2) * OVERLAP_FACTOR, LEG_THICK*0.85))))
+            self.parts.append(Part(knee, shin, Mat4.from_translation(Vec3(0, -LEG_CALF_LEN * OVERLAP_FACTOR / 2, 0)) @ Mat4.from_scale(Vec3(LEG_THICK*0.85, (LEG_CALF_LEN / 2) * OVERLAP_FACTOR, LEG_THICK*0.85))))
 
             # Foot
             foot = Joint(f"{side}_foot", parent=knee)
@@ -201,10 +202,21 @@ class PungpungBase(Character):
 
     def update_animation(self, time):
         if self.state == "waving": self._wave_arms_animation(time)
-        elif self.state == "walking": self._walk_animation(time)
+        elif self.state == "walking": 
+            if (self.walk_target):
+                current_position = Vec3(self.root.world_transform[12], self.root.world_transform[13], self.root.world_transform[14])
+                if (self.walk_target - current_position).length() < 0.1:
+                    self.set_state("base_dance")
+                    self.walk_target = None
+                else: self.turn_twards(0.5 / 60 ,self.walk_target)
+            self._walk_animation(time)
         elif self.state == "idle": self._idle_animation(time)
         elif self.state == "mouth_fart": self._mouth_fart(time)
         elif self.state == "base_dance": self._base_dance(time)
+    
+    def update_target(self, target_pos: Vec3):
+        self.walk_target = target_pos
+        self.set_state("walking")
 
     # animations
     def _wave_arms_animation(self, time):
@@ -303,7 +315,7 @@ class PungpungBase(Character):
         """
         pungpung does base dance; bends knee, with his hand on his hip
         """
-        theta = math.fabs(math.sin(time - self.set_time))
+        theta = math.fabs(math.sin((time - self.set_time)*2))
 
         current_drop = MAX_LEG_DROP * math.cos(theta)
         current_torso_y = TORSO_BASE_Y - (MAX_LEG_DROP - current_drop)
