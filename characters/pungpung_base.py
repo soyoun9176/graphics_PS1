@@ -349,7 +349,7 @@ class PungpungBase(Character):
         c_dir_2d = Vec3(current_dir.x, 0, current_dir.z).normalize()
         t_dir_2d = Vec3(self.target_direction.x, 0, self.target_direction.z).normalize()
 
-        turn_amount = 0.5 / 60.0
+        turn_amount = 1.5 / 60.0
 
         # calculate angle -> if smaller than turn_amount no turn
         dot_val = max(-1.0, min(1.0, c_dir_2d.dot(t_dir_2d)))

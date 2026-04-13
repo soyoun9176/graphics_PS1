@@ -76,6 +76,7 @@ class Control:
 
         if not self.window.camera_target_character:
             cam_speed = 2.0 # TODO: fit this
+            zoom_speed = 15.0
             if self.keys[key.A]:
                 self.window.orbit_theta -= cam_speed * dt
             if self.keys[key.D]:
@@ -84,6 +85,10 @@ class Control:
                 self.window.orbit_y += cam_speed * dt
             if self.keys[key.S]:
                 self.window.orbit_y -= cam_speed * dt
+            if self.keys[key.Z]:
+                self.window.orbit_radius -= zoom_speed * dt
+            if self.keys[key.X]:
+                self.window.orbit_radius += zoom_speed * dt
 
     def _find_character_by_name(self, name):
         """
@@ -116,8 +121,5 @@ class Control:
         pass
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
-        if not self.window.camera_target_character:
-            zoom_speed = 1.5
-            self.window.orbit_radius -= scroll_y * zoom_speed
-            
-            self.window.orbit_radius = max(2.0, min(self.window.orbit_radius, 50.0))
+        # TODO: cannot test now
+        pass
