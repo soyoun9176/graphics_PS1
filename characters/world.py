@@ -63,3 +63,21 @@ class World:
             if character.name == name:
                 return character
         return None
+
+    def pungpung_friends_dance(self):
+        pungpung = self.get_character_by_name("Pungpung")
+        if pungpung == None : return
+        names = ["Friend1", "Friend2", "Friend3", "Friend4"]
+        friends = []
+        for name in names:
+            character = self.get_character_by_name(name)
+            if (character == None) : return
+            friends.append(character)
+        
+        friends_pos, friends_dirs = pungpung.get_friends_position_and_direction()
+
+        def _start_moving(dt):
+            for i in range(4):
+                friends[i].update_target(friends_pos[i], friends_dirs[i])
+        
+        return _start_moving
