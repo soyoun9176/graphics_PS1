@@ -1,14 +1,9 @@
 import pyglet
 from pyglet import window, app, shapes
-from pyglet.window import mouse,key
+from pyglet.window import mouse, key
 from pyglet.math import Mat4, Vec3
 
-
-
 class Control:
-    """
-    Control class controls keyboard & mouse inputs.
-    """
     def __init__(self, window):
         window.on_key_press = self.on_key_press
         window.on_key_release = self.on_key_release
@@ -23,28 +18,12 @@ class Control:
         pyglet.clock.schedule_interval(self.update_continuous_input, 1/60.0)
         self.setup()
 
-    def setup(self):
-        pass
-
-    def update(self, vector):
-        pass
+    def setup(self): pass
+    def update(self, vector): pass
 
     def on_key_press(self, symbol, modifier):
-        # TODO:
         if symbol == pyglet.window.key.C:
             self.window.move_cam = not self.window.move_cam
-        elif symbol == pyglet.window.key.W:
-            pungpung = self._find_character_by_name("Pungpung")
-            if pungpung:
-                pungpung.set_state("waving")
-        elif symbol == pyglet.window.key.I:
-            pungpung = self._find_character_by_name("Pungpung")
-            if pungpung:
-                pungpung.set_state("idle")
-        elif symbol == pyglet.window.key.K:
-            pungpung = self._find_character_by_name("Pungpung")
-            if pungpung:
-                pungpung.set_state("walking")
         elif symbol == pyglet.window.key.M:
             pungpung = self._find_character_by_name("Pungpung")
             if pungpung:
@@ -58,40 +37,53 @@ class Control:
         elif symbol == pyglet.window.key.P:
             if self.window.camera_target_character:
                 self.window.camera_target_character = None
-                self.window.view_mat = Mat4.look_at(self.window.cam_eye, target=self.window.cam_target, up=self.window.cam_vup)
+                self.window.cam_target = Vec3(0, 0, 0) 
             else:
                 pungpung = self._find_character_by_name("Pungpung")
                 if pungpung:
                     self.window.camera_target_character = pungpung
-
-
+        elif symbol == pyglet.window.key.F:
+            names = ["Friend1", "Friend2", "Friend3", "Friend3"]
+            for name in names:
+                character = self.window.world.get_character_by_name(name)
+                if (character == None) :continue
+                character.set_state("idle")
 
     def update_continuous_input(self, dt):
         """
         Handle keys that need to be checked every frame.
         """
+        # character movement
+        char = self._find_character_by_name("Pungpung")
+        if char:
+            rotation_speed = 2.0
+            if self.keys[key.LEFT] or self.keys[key.RIGHT]:
+                world_mat = char.root.world_transform
+                char_pos = Vec3(world_mat[12], world_mat[13], world_mat[14])
+                local_right = Vec3(world_mat[0], world_mat[1], world_mat[2])
+                
+                if self.keys[key.RIGHT]:
+                    char.turn_twards(rotation_speed * dt, char_pos - local_right)
+                else:
+                    char.turn_twards(rotation_speed * dt, char_pos + local_right)
+
+            if self.keys[key.UP] or self.keys[key.DOWN]:
+                char.walk_direction = 1 if self.keys[key.UP] else -1
+                if char.state != "walking":
+                    char.set_state("walking")
+            elif char.state == "walking" and char.walk_target is None:
+                char.set_state("idle")
+
         if not self.window.camera_target_character:
-            return
-
-        rotation_speed = 0.5
-        char = self.window.camera_target_character
-        
-        if self.keys[key.LEFT] or self.keys[key.RIGHT]:
-            world_mat = char.root.world_transform
-            char_pos = Vec3(world_mat[12], world_mat[13], world_mat[14])
-            local_right = Vec3(world_mat[0], world_mat[1], world_mat[2])
-            
-            if self.keys[key.RIGHT]:
-                char.turn_twards(rotation_speed * dt, char_pos - local_right)
-            else:
-                char.turn_twards(rotation_speed * dt, char_pos + local_right)
-
-        if self.keys[key.UP] or self.keys[key.DOWN]:
-            char.walk_direction = 1 if self.keys[key.UP] else -1
-            if char.state != "walking":
-                char.set_state("walking")
-        elif char.state == "walking" and char.walk_target is None:
-            char.set_state("idle")
+            cam_speed = 2.0 # TODO: fit this
+            if self.keys[key.A]:
+                self.window.orbit_theta -= cam_speed * dt
+            if self.keys[key.D]:
+                self.window.orbit_theta += cam_speed * dt
+            if self.keys[key.W]:
+                self.window.orbit_y += cam_speed * dt
+            if self.keys[key.S]:
+                self.window.orbit_y -= cam_speed * dt
 
     def _find_character_by_name(self, name):
         """
@@ -124,5 +116,8 @@ class Control:
         pass
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
-        # TODO:
-        pass
+        if not self.window.camera_target_character:
+            zoom_speed = 1.5
+            self.window.orbit_radius -= scroll_y * zoom_speed
+            
+            self.window.orbit_radius = max(2.0, min(self.window.orbit_radius, 50.0))

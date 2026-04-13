@@ -56,7 +56,7 @@ class PungpungBase(Character):
         self.root = Joint("root")
         self.set_time = pyglet.clock.get_default().time()
         self.walk_last_time = None
-        self.speed = 0.7
+        self.speed = 1.3
         self.walk_target = None
         self.walk_direction = 1
         self.target_direction = None
