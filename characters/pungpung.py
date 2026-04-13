@@ -1,6 +1,7 @@
 from characters.pungpung_base import PungpungBase
 import math
 import pyglet
+import random
 from characters.rig import Joint, Part
 from characters.character import Character
 from pyglet.math import Mat4, Vec3
@@ -87,3 +88,10 @@ class FriendPung(PungpungBase):
         self.head.base_transform = Mat4()
         self.parts.extend(h_parts)
         self._register_eyes(h_eyes, h_alt_eyes)
+
+    def set_random_target(self, world_size:float = 100.0):
+        x = (random.random() * world_size * 2) - world_size
+        z = (random.random() * world_size * 2) - world_size
+        target_pos = Vec3(x,0,z)
+        if self.state == "idle":
+            self.update_target(target_pos)

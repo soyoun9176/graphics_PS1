@@ -23,7 +23,8 @@ if __name__ == '__main__':
     from characters.rig import Part
 
     # Create and add a light grey ground
-    ground = Ground(size=20.0, color=(255, 200, 200, 255)) # Ground(size=100.0, color=(111, 79, 40, 255))
+    world_size = 100.0
+    ground = Ground(size=world_size, color=(255, 200, 200, 255)) # Ground(size=100.0, color=(111, 79, 40, 255))
     renderer.add_static_object(ground)
 
     # Add the main character
@@ -43,6 +44,8 @@ if __name__ == '__main__':
         friend = FriendPung(name=name, body_color=color)
         friend.root.local_transform = Mat4.from_translation(Vec3(*pos))
         renderer.add_character(friend)
+        
+        pyglet.clock.schedule_interval(friend.set_random_target, 5)
 
 
     # Run the application

@@ -209,7 +209,7 @@ class PungpungBase(Character):
                 current_position = Vec3(self.root.world_transform[12], self.root.world_transform[13], self.root.world_transform[14])
                 if (self.walk_target - current_position).length() < 0.1:
                     if self.target_direction: self.set_state("turning")
-                    else: self.set_state("base_dance")
+                    else: self.set_state("idle")
                     self.walk_target = None
                 else: self.turn_twards(0.5 / 60 ,self.walk_target)
             self._walk_animation(time)

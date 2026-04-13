@@ -36,7 +36,7 @@ class Ground(StaticObject):
         wall_mesh = Cube(scale=(size, wall_height*0.5, 0.1))
         wall_color = tuple(max(0, c - 30) for c in color[:3]) + (color[3],)
         self._solid_color(wall_mesh, wall_color)
-        wall_center = Cube(scale=(size*0.6, wall_height*0.5, 0.1))
+        wall_center = Cube(scale=(size, wall_height*0.5, 0.1))
         self._solid_color(wall_center, wall_color)
         backwall_color = tuple(max(0, c - 60) for c in color[:3]) + (color[3],)
         wall_back = Cube(scale=(size*3, wall_height, 0.1))
