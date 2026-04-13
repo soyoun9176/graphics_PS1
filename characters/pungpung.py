@@ -58,6 +58,7 @@ class PungpungBase(Character):
         self.walk_last_time = None
         self.speed = 0.7
         self.walk_target = None
+        self.walk_direction = 1
         
         # Sound effects
         self.fart_sound_played = False
@@ -216,6 +217,7 @@ class PungpungBase(Character):
     
     def update_target(self, target_pos: Vec3):
         self.walk_target = target_pos
+        self.walk_direction = 1
         self.set_state("walking")
 
     # animations
@@ -271,7 +273,7 @@ class PungpungBase(Character):
         self.right_elbow.local_transform = self.right_elbow.base_transform @ Mat4.from_rotation(elbow_flex - (r_swing * elbow_swing), Vec3(1, 0, 0))
         
         if self.walk_last_time is not None: 
-            self.move_forward((time - self.walk_last_time) * walk_speed * 2)
+            self.move_forward((time - self.walk_last_time) * walk_speed * 2 * self.walk_direction)
         self.walk_last_time = time
 
     def _idle_animation(self, time):

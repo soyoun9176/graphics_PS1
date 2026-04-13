@@ -66,7 +66,7 @@ class Control:
 
     def update_continuous_input(self, dt):
         """
-        Handle keys that need to be checked every frame (like rotation).
+        Handle keys that need to be checked every frame.
         """
         if not self.window.camera_target_character:
             return
@@ -75,17 +75,21 @@ class Control:
         char = self.window.camera_target_character
         
         if self.keys[key.LEFT] or self.keys[key.RIGHT]:
-            # To use turn_twards for manual keys, we create a temporary relative target
             world_mat = char.root.world_transform
             char_pos = Vec3(world_mat[12], world_mat[13], world_mat[14])
             local_right = Vec3(world_mat[0], world_mat[1], world_mat[2])
             
             if self.keys[key.RIGHT]:
-                # Target is to the LEFT of the character
                 char.turn_twards(rotation_speed * dt, char_pos - local_right)
             else:
-                # Target is to the RIGHT of the character
                 char.turn_twards(rotation_speed * dt, char_pos + local_right)
+
+        if self.keys[key.UP] or self.keys[key.DOWN]:
+            char.walk_direction = 1 if self.keys[key.UP] else -1
+            if char.state != "walking":
+                char.set_state("walking")
+        elif char.state == "walking" and char.walk_target is None:
+            char.set_state("idle")
 
     def _find_character_by_name(self, name):
         """

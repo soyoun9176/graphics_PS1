@@ -11,6 +11,9 @@ class Character:
         self.root = None
         self.parts = []
         self.name = "Character"
+        self.state = "idle"
+        self.walk_target = None
+        self.walk_direction = 1
 
     def update_animation(self, time):
         """
